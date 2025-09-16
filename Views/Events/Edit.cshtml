@@ -30,6 +30,24 @@
         <input asp-for="Organizer" class="form-control" />
         <span class="text-danger" asp-validation-for="Organizer"></span>
     </div>
+    <div class="col-12">
+        <label asp-for="Address" class="form-label"></label>
+        <input asp-for="Address" class="form-control" placeholder="Full address (e.g., 123 Main St, Seattle, WA 98101)" />
+        <span class="text-danger" asp-validation-for="Address"></span>
+        <div class="form-text">Enter the complete address for better location accuracy</div>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="TotalSeats" class="form-label"></label>
+        <input asp-for="TotalSeats" class="form-control" placeholder="Total number of seats" min="1" id="totalSeats" />
+        <span class="text-danger" asp-validation-for="TotalSeats"></span>
+        <div class="form-text">Leave empty for unlimited capacity</div>
+    </div>
+    <div class="col-md-6">
+        <label asp-for="AvailableSeats" class="form-label"></label>
+        <input asp-for="AvailableSeats" class="form-control" placeholder="Available seats" min="0" id="availableSeats" />
+        <span class="text-danger" asp-validation-for="AvailableSeats"></span>
+        <div class="form-text">Number of seats currently available (auto-syncs with registrations)</div>
+    </div>
     <div class="col-md-3">
         <label asp-for="StartUtc" class="form-label"></label>
         <input asp-for="StartUtc" type="datetime-local" class="form-control" value="@Model.StartUtc.ToString("yyyy-MM-ddTHH:mm")" />
@@ -62,4 +80,24 @@
     </div>
 </form>
 </div>
-@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+@section Scripts { 
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const totalSeatsInput = document.getElementById('totalSeats');
+            const availableSeatsInput = document.getElementById('availableSeats');
+            
+            if (totalSeatsInput && availableSeatsInput) {
+                totalSeatsInput.addEventListener('input', function() {
+                    const totalSeats = parseInt(this.value);
+                    if (totalSeats && totalSeats > 0) {
+                        // Only auto-set if available seats is currently 0 or empty
+                        if (!availableSeatsInput.value || availableSeatsInput.value == 0) {
+                            availableSeatsInput.value = totalSeats;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}

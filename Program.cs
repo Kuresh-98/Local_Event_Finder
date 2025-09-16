@@ -33,6 +33,12 @@ builder.Services.ConfigureApplicationCookie(o =>
 // Event service (DB backed)
 builder.Services.AddScoped<IEventService, DbEventService>();
 
+// Location service for distance calculations
+builder.Services.AddScoped<ILocationService, LocationService>();
+
+// Event interest service
+builder.Services.AddScoped<IEventInterestService, EventInterestService>();
+
 var app = builder.Build();
 
 // Apply migrations & seed
@@ -63,9 +69,9 @@ using (var scope = app.Services.CreateScope())
     {
         db.Events.AddRange(new[]
         {
-            new Event { Title="Intro Tech Meetup", Description="Kickoff session for tech enthusiasts.", Category="Tech", City="Seattle", Venue="Community Hub", StartUtc=DateTime.UtcNow.AddDays(2), EndUtc=DateTime.UtcNow.AddDays(2).AddHours(2), Organizer="CoreTeam", IsFree=true },
-            new Event { Title="Evening Jazz", Description="Smooth jazz performances.", Category="Music", City="Seattle", Venue="Blue Note Hall", StartUtc=DateTime.UtcNow.AddDays(4), EndUtc=DateTime.UtcNow.AddDays(4).AddHours(3), Organizer="CityArts", IsFree=false },
-            new Event { Title="Startup Pitch Night", Description="Founders pitch early ideas.", Category="Business", City="Portland", Venue="Innovation Loft", StartUtc=DateTime.UtcNow.AddDays(6), EndUtc=DateTime.UtcNow.AddDays(6).AddHours(1), Organizer="StartupOrg", IsFree=true }
+            new Event { Title="Intro Tech Meetup", Description="Kickoff session for tech enthusiasts.", Category="Tech", City="Seattle", Venue="Community Hub", Address="123 Tech Street, Seattle, WA 98101", StartUtc=DateTime.UtcNow.AddDays(2), EndUtc=DateTime.UtcNow.AddDays(2).AddHours(2), Organizer="CoreTeam", IsFree=true, TotalSeats=50, AvailableSeats=50, Latitude=47.6062, Longitude=-122.3321 },
+            new Event { Title="Evening Jazz", Description="Smooth jazz performances.", Category="Music", City="Seattle", Venue="Blue Note Hall", Address="456 Music Avenue, Seattle, WA 98102", StartUtc=DateTime.UtcNow.AddDays(4), EndUtc=DateTime.UtcNow.AddDays(4).AddHours(3), Organizer="CityArts", IsFree=false, TotalSeats=100, AvailableSeats=100, Latitude=47.6099, Longitude=-122.3345 },
+            new Event { Title="Startup Pitch Night", Description="Founders pitch early ideas.", Category="Business", City="Portland", Venue="Innovation Loft", Address="789 Startup Boulevard, Portland, OR 97201", StartUtc=DateTime.UtcNow.AddDays(6), EndUtc=DateTime.UtcNow.AddDays(6).AddHours(1), Organizer="StartupOrg", IsFree=true, TotalSeats=30, AvailableSeats=30, Latitude=45.5231, Longitude=-122.6765 }
         });
         db.SaveChanges();
     }

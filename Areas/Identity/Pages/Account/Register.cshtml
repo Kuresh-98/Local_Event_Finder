@@ -1,0 +1,90 @@
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Local Event Finder</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+    <div class="identity-container">
+        <div class="identity-card">
+            <div class="identity-header">
+                <h1 class="identity-title">Join Us</h1>
+                <p class="identity-subtitle">Create your account to get started</p>
+            </div>
+
+            <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="identity-form">
+                <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+                
+                <div class="form-group">
+                    <label asp-for="Input.Email" class="form-label">Email Address</label>
+                    <input asp-for="Input.Email" class="form-control" placeholder="Enter your email" autocomplete="username" />
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.Password" class="form-label">Password</label>
+                    <input asp-for="Input.Password" class="form-control" placeholder="Create a password" autocomplete="new-password" />
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Input.ConfirmPassword" class="form-label">Confirm Password</label>
+                    <input asp-for="Input.ConfirmPassword" class="form-control" placeholder="Confirm your password" autocomplete="new-password" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                </div>
+
+                <button id="registerSubmit" type="submit" class="identity-button">
+                    <i class="bi bi-person-plus me-2"></i>Create Account
+                </button>
+
+                <div class="identity-links">
+                    <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Already have an account? Sign in</a>
+                </div>
+            </form>
+
+            @{
+                if ((Model.ExternalLogins?.Count ?? 0) == 0)
+                {
+                    <div class="identity-external">
+                        <h4>External Authentication</h4>
+                        <p>There are no external authentication services configured.</p>
+                        <a href="https://go.microsoft.com/fwlink/?LinkID=532715">See this article about setting up this ASP.NET application to support logging in via external services</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="identity-divider">
+                        <span>Or continue with</span>
+                    </div>
+                    <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                        <div>
+                            @foreach (var provider in Model.ExternalLogins!)
+                            {
+                                <button type="submit" class="identity-button" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">
+                                    <i class="bi bi-@(provider.Name.ToLower()) me-2"></i>@provider.DisplayName
+                                </button>
+                            }
+                        </div>
+                    </form>
+                }
+            }
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>

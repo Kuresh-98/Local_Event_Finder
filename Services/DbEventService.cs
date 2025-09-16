@@ -11,7 +11,7 @@ public class DbEventService : IEventService
 
     public IEnumerable<Event> GetAll() => _db.Events.AsNoTracking().OrderBy(e => e.StartUtc).ToList();
 
-    public Event? GetById(int id) => _db.Events.AsNoTracking().FirstOrDefault(e => e.Id == id);
+    public Event? GetById(int id) => _db.Events.FirstOrDefault(e => e.Id == id);
 
     public IEnumerable<Event> Search(string? text, string? city, string? category, DateTime? from, DateTime? to)
     {
@@ -45,8 +45,24 @@ public class DbEventService : IEventService
     {
         var tracked = _db.Events.FirstOrDefault(e => e.Id == ev.Id);
         if (tracked == null) return null;
-        tracked.Title = ev.Title; tracked.Description = ev.Description; tracked.StartUtc = ev.StartUtc; tracked.EndUtc = ev.EndUtc;
-        tracked.Category = ev.Category; tracked.City = ev.City; tracked.Venue = ev.Venue; tracked.IsFree = ev.IsFree; tracked.Organizer = ev.Organizer; tracked.ExternalUrl = ev.ExternalUrl;
+        
+        // Update all fields including new seat management fields
+        tracked.Title = ev.Title;
+        tracked.Description = ev.Description;
+        tracked.StartUtc = ev.StartUtc;
+        tracked.EndUtc = ev.EndUtc;
+        tracked.Category = ev.Category;
+        tracked.City = ev.City;
+        tracked.Venue = ev.Venue;
+        tracked.IsFree = ev.IsFree;
+        tracked.Organizer = ev.Organizer;
+        tracked.ExternalUrl = ev.ExternalUrl;
+        tracked.Address = ev.Address;
+        tracked.Latitude = ev.Latitude;
+        tracked.Longitude = ev.Longitude;
+        tracked.TotalSeats = ev.TotalSeats;
+        tracked.AvailableSeats = ev.AvailableSeats;
+        
         _db.SaveChanges();
         return tracked;
     }

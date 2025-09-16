@@ -15,12 +15,83 @@
         <span><i class="bi bi-building"></i> @Model.Venue</span>
         <span><i class="bi bi-person"></i> @Model.Organizer</span>
     </div>
+    <div class="event-location mb-2">
+        <span><i class="bi bi-geo-alt"></i> @Model.Address</span>
+        @if (!string.IsNullOrWhiteSpace(Model.Address))
+        {
+            <a href="https://www.google.com/maps/search/?api=1&query=@Uri.EscapeDataString(Model.Address)" 
+               target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary ms-2">
+                <i class="bi bi-map"></i> View on Map
+            </a>
+        }
+    </div>
     <div class="event-time"><i class="bi bi-calendar-event"></i> @Model.StartUtc.ToString("f") - @Model.EndUtc.ToString("t") <span class="badge bg-secondary" style="font-size:.55rem;">UTC</span></div>
+    @if (Model.TotalSeats.HasValue)
+    {
+        <div class="event-seats mb-2">
+            <span><i class="bi bi-people"></i> 
+                @Model.AvailableSeats of @Model.TotalSeats seats available
+                @if (Model.AvailableSeats == 0)
+                {
+                    <span class="badge bg-danger ms-1">Sold Out</span>
+                }
+                else if (Model.AvailableSeats <= 5)
+                {
+                    <span class="badge bg-warning ms-1">Limited Seats</span>
+                }
+            </span>
+        </div>
+    }
     <hr class="text-secondary" />
     <p style="line-height:1.5; font-size:.95rem;">@Model.Description</p>
     @if (!string.IsNullOrWhiteSpace(Model.ExternalUrl))
     {
         <p><a href="@Model.ExternalUrl" target="_blank" rel="noopener" class="btn btn-sm btn-accent"><i class="bi bi-box-arrow-up-right"></i> External Link</a></p>
+    }
+    
+    @if (User.Identity?.IsAuthenticated == true && !isAdmin)
+    {
+        <div class="mt-3">
+            <button id="interestBtn" class="btn btn-primary" data-event-id="@Model.Id" 
+                    @(Model.TotalSeats.HasValue && Model.AvailableSeats <= 0 ? "disabled" : "")>
+                <i class="bi bi-heart"></i> <span id="interestText">Reserve Seat</span>
+            </button>
+            <small class="text-muted d-block mt-1" id="interestCount">0 people registered</small>
+            @if (Model.TotalSeats.HasValue && Model.AvailableSeats <= 0)
+            {
+                <div class="alert alert-warning mt-2 mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> This event is fully booked!
+                </div>
+            }
+        </div>
+    }
+    else if (User.Identity?.IsAuthenticated == true && isAdmin)
+    {
+        <div class="mt-3">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> <strong>Admin View:</strong> You can manage seats in the Edit section below.
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="mt-3">
+            @if (Model.TotalSeats.HasValue && Model.AvailableSeats <= 0)
+            {
+                <button class="btn btn-secondary" disabled>
+                    <i class="bi bi-x-circle"></i> Event Full
+                </button>
+                <div class="alert alert-warning mt-2 mb-0">
+                    <i class="bi bi-exclamation-triangle"></i> This event is fully booked!
+                </div>
+            }
+            else
+            {
+                <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-primary">
+                    <i class="bi bi-heart"></i> Login to Reserve Seat
+                </a>
+            }
+        </div>
     }
     @if (isAdmin)
     {
@@ -30,3 +101,106 @@
         </div>
     }
 </div>
+
+@section Scripts {
+<script>
+// Interest tracking functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const interestBtn = document.getElementById('interestBtn');
+    const interestText = document.getElementById('interestText');
+    const interestCount = document.getElementById('interestCount');
+    
+    if (interestBtn) {
+        const eventId = interestBtn.getAttribute('data-event-id');
+        
+        // Load initial interest status
+        loadInterestStatus(eventId);
+        
+        // Handle interest button click
+        interestBtn.addEventListener('click', function() {
+            toggleInterest(eventId);
+        });
+    }
+    
+    async function loadInterestStatus(eventId) {
+        try {
+            const response = await fetch(`/Events/InterestStatus/${eventId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                updateInterestUI(data.isInterested, data.interestCount, data.availableSeats, data.canRegister);
+            }
+        } catch (error) {
+            console.error('Error loading interest status:', error);
+        }
+    }
+    
+    async function toggleInterest(eventId) {
+        try {
+            const response = await fetch(`/Events/ToggleInterest/${eventId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                updateInterestUI(data.isInterested, data.interestCount, data.availableSeats, data.canRegister);
+                showFlashMessage(data.message, 'success');
+            } else {
+                showFlashMessage(data.message || 'Error updating interest', 'danger');
+            }
+        } catch (error) {
+            console.error('Error toggling interest:', error);
+            showFlashMessage('Error updating interest', 'danger');
+        }
+    }
+    
+    function updateInterestUI(isInterested, count, availableSeats, canRegister) {
+        if (interestText) {
+            interestText.textContent = isInterested ? 'Reserved!' : 'Reserve Seat';
+        }
+        
+        if (interestCount) {
+            interestCount.textContent = `${count} people registered`;
+        }
+        
+        if (interestBtn) {
+            if (isInterested) {
+                interestBtn.className = 'btn btn-success';
+                interestBtn.disabled = false;
+            } else if (canRegister && availableSeats > 0) {
+                interestBtn.className = 'btn btn-primary';
+                interestBtn.disabled = false;
+            } else {
+                interestBtn.className = 'btn btn-secondary';
+                interestBtn.disabled = true;
+            }
+        }
+    }
+    
+    function showFlashMessage(message, type) {
+        // Create a simple flash message
+        const flashDiv = document.createElement('div');
+        flashDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        flashDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        flashDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(flashDiv);
+        
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            if (flashDiv.parentNode) {
+                flashDiv.parentNode.removeChild(flashDiv);
+            }
+        }, 3000);
+    }
+});
+</script>
+}

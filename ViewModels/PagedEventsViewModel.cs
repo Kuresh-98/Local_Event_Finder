@@ -16,7 +16,12 @@ public class PagedEventsViewModel
     public DateTime? From { get; set; }
     public DateTime? To { get; set; }
 
-    public string Sort { get; set; } = "startAsc"; // startAsc|startDesc|titleAsc|titleDesc
+    // Location-based search parameters
+    public double? UserLat { get; set; }
+    public double? UserLon { get; set; }
+    public double Radius { get; set; } = 10; // Default 10km radius
 
-    public string BuildQuery(int page) => $"text={Uri.EscapeDataString(SearchText ?? string.Empty)}&city={Uri.EscapeDataString(City ?? string.Empty)}&category={Uri.EscapeDataString(Category ?? string.Empty)}&from={(From?.ToString("yyyy-MM-dd") ?? string.Empty)}&to={(To?.ToString("yyyy-MM-dd") ?? string.Empty)}&sort={Sort}&page={page}";
+    public string Sort { get; set; } = "startAsc"; // startAsc|startDesc|titleAsc|titleDesc|distanceAsc|distanceDesc
+
+    public string BuildQuery(int page) => $"text={Uri.EscapeDataString(SearchText ?? string.Empty)}&city={Uri.EscapeDataString(City ?? string.Empty)}&category={Uri.EscapeDataString(Category ?? string.Empty)}&from={(From?.ToString("yyyy-MM-dd") ?? string.Empty)}&to={(To?.ToString("yyyy-MM-dd") ?? string.Empty)}&userLat={UserLat}&userLon={UserLon}&radius={Radius}&sort={Sort}&page={page}";
 }

@@ -12,8 +12,8 @@
     <div class="ms-auto d-flex gap-2">
         <a class="btn btn-sm btn-outline-secondary @(Model.Sort=="startAsc"?"active":"")" asp-route-sort="startAsc" asp-route-page="1" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">Start &#9650;</a>
         <a class="btn btn-sm btn-outline-secondary @(Model.Sort=="startDesc"?"active":"")" asp-route-sort="startDesc" asp-route-page="1" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">Start &#9660;</a>
-        <a class="btn btn-sm btn-outline-secondary @(Model.Sort=="titleAsc"?"active":"")" asp-route-sort="titleAsc" asp-route-page="1" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">Title A–Z</a>
-        <a class="btn btn-sm btn-outline-secondary @(Model.Sort=="titleDesc"?"active":"")" asp-route-sort="titleDesc" asp-route-page="1" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">Title Z–A</a>
+        <a class="btn btn-sm btn-outline-secondary @(Model.Sort=="titleAsc"?"active":"")" asp-route-sort="titleAsc" asp-route-page="1" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">Title Aï¿½Z</a>
+        <a class="btn btn-sm btn-outline-secondary @(Model.Sort=="titleDesc"?"active":"")" asp-route-sort="titleDesc" asp-route-page="1" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">Title Zï¿½A</a>
     </div>
 </div>
 <div class="filter-panel">
@@ -45,7 +45,10 @@
         </div>
         <div class="col-lg-1 col-md-2 d-grid">
             <label class="form-label d-none d-lg-block filter-label">&nbsp;</label>
-            <button class="btn btn-primary btn-sm" type="submit" title="Apply filters"><i class="bi bi-funnel"></i></button>
+            <button class="btn btn-search btn-sm" type="submit" title="Apply filters">
+                <i class="bi bi-search"></i>
+                <span class="d-none d-md-inline ms-1">Search</span>
+            </button>
         </div>
     </form>
 </div>
@@ -68,6 +71,18 @@
                 <span><i class="bi bi-geo-alt"></i> @e.Venue</span>
                 <span><i class="bi bi-person"></i> @e.Organizer</span>
                 <span class="badge @(e.IsFree ? "badge-free" : "badge-paid")">@(e.IsFree ? "Free" : "Paid")</span>
+                @if (e.TotalSeats.HasValue)
+                {
+                    <span><i class="bi bi-people"></i> @e.AvailableSeats/@e.TotalSeats seats</span>
+                    @if (e.AvailableSeats == 0)
+                    {
+                        <span class="badge bg-danger">Sold Out</span>
+                    }
+                    else if (e.AvailableSeats <= 5)
+                    {
+                        <span class="badge bg-warning">Limited</span>
+                    }
+                }
             </div>
             <p class="small text-muted" style="flex-grow:1; margin-top:.25rem;">@e.Description.Substring(0, Math.Min(110, e.Description.Length))@(e.Description.Length > 110 ? "..." : "")</p>
             <div class="event-actions">
