@@ -2,6 +2,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+// Register the in-memory event service
+builder.Services.AddSingleton<Local_Event_Finder.Services.IEventService, Local_Event_Finder.Services.InMemoryEventService>();
 
 var app = builder.Build();
 

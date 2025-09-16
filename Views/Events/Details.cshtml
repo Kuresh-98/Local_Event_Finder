@@ -1,0 +1,17 @@
+@model Local_Event_Finder.Models.Event
+@{
+    ViewData["Title"] = Model.Title;
+}
+<a asp-action="Index">&larr; Back to list</a>
+<h1>@Model.Title</h1>
+<p><strong>Category:</strong> @Model.Category</p>
+<p><strong>City:</strong> @Model.City</p>
+<p><strong>Venue:</strong> @Model.Venue</p>
+<p><strong>Starts:</strong> @Model.StartUtc.ToLocalTime().ToString("f")</p>
+<p><strong>Ends:</strong> @Model.EndUtc.ToLocalTime().ToString("f")</p>
+<p><strong>Organizer:</strong> @Model.Organizer</p>
+<p>@Model.Description</p>
+@if (!string.IsNullOrWhiteSpace(Model.ExternalUrl))
+{
+    <p><a href="@Model.ExternalUrl" target="_blank" rel="noopener">More info</a></p>
+}

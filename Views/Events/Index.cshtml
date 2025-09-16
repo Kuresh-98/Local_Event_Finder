@@ -1,0 +1,52 @@
+@model IEnumerable<Local_Event_Finder.Models.Event>
+@{
+    ViewData["Title"] = "Events";
+}
+<h1>Events</h1>
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input name="text" value="@ViewData["SearchText"]" class="form-control" placeholder="Search text" />
+    </div>
+    <div class="col-md-2">
+        <input name="city" value="@ViewData["City"]" class="form-control" placeholder="City" />
+    </div>
+    <div class="col-md-2">
+        <input name="category" value="@ViewData["Category"]" class="form-control" placeholder="Category" />
+    </div>
+    <div class="col-md-2">
+        <input type="date" name="from" value="@ViewData["From"]" class="form-control" />
+    </div>
+    <div class="col-md-2">
+        <input type="date" name="to" value="@ViewData["To"]" class="form-control" />
+    </div>
+    <div class="col-md-1 d-grid">
+        <button class="btn btn-primary" type="submit">Go</button>
+    </div>
+</form>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>City</th>
+            <th>Start</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var e in Model)
+    {
+        <tr>
+            <td>@e.Title</td>
+            <td>@e.Category</td>
+            <td>@e.City</td>
+            <td>@e.StartUtc.ToLocalTime().ToString("g")</td>
+            <td><a asp-action="Details" asp-route-id="@e.Id" class="btn btn-sm btn-outline-secondary">Details</a></td>
+        </tr>
+    }
+    </tbody>
+</table>
+@if(!Model.Any())
+{
+    <p>No events found.</p>
+}
