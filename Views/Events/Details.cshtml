@@ -1,17 +1,32 @@
 @model Local_Event_Finder.Models.Event
 @{
     ViewData["Title"] = Model.Title;
+    bool showCrud = false; // hide edit/delete for public
 }
-<a asp-action="Index">&larr; Back to list</a>
-<h1>@Model.Title</h1>
-<p><strong>Category:</strong> @Model.Category</p>
-<p><strong>City:</strong> @Model.City</p>
-<p><strong>Venue:</strong> @Model.Venue</p>
-<p><strong>Starts:</strong> @Model.StartUtc.ToLocalTime().ToString("f")</p>
-<p><strong>Ends:</strong> @Model.EndUtc.ToLocalTime().ToString("f")</p>
-<p><strong>Organizer:</strong> @Model.Organizer</p>
-<p>@Model.Description</p>
-@if (!string.IsNullOrWhiteSpace(Model.ExternalUrl))
-{
-    <p><a href="@Model.ExternalUrl" target="_blank" rel="noopener">More info</a></p>
-}
+<a asp-action="Index" class="btn btn-sm btn-outline-secondary mb-3"><i class="bi bi-arrow-left"></i> Back</a>
+<div class="event-card" style="max-width:860px; margin:0 auto;">
+    <div class="d-flex flex-wrap gap-2 mb-2">
+        <span class="event-badge"><i class="bi bi-tag"></i> @Model.Category</span>
+        <span class="event-badge"><i class="bi bi-geo"></i> @Model.City</span>
+        <span class="event-badge @(Model.IsFree ? "badge-free" : "badge-paid")">@(Model.IsFree ? "Free" : "Paid")</span>
+    </div>
+    <h1 class="event-title" style="font-size:1.6rem;">@Model.Title</h1>
+    <div class="event-meta mb-2">
+        <span><i class="bi bi-building"></i> @Model.Venue</span>
+        <span><i class="bi bi-person"></i> @Model.Organizer</span>
+    </div>
+    <div class="event-time"><i class="bi bi-calendar-event"></i> @Model.StartUtc.ToLocalTime().ToString("f") - @Model.EndUtc.ToLocalTime().ToString("t")</div>
+    <hr class="text-secondary" />
+    <p style="line-height:1.5; font-size:.95rem;">@Model.Description</p>
+    @if (!string.IsNullOrWhiteSpace(Model.ExternalUrl))
+    {
+        <p><a href="@Model.ExternalUrl" target="_blank" rel="noopener" class="btn btn-sm btn-accent"><i class="bi bi-box-arrow-up-right"></i> External Link</a></p>
+    }
+    @if (showCrud)
+    {
+        <div class="event-actions">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary btn-sm"><i class="bi bi-pencil"></i> Edit</a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</a>
+        </div>
+    }
+</div>

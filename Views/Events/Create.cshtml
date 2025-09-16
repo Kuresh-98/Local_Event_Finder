@@ -1,63 +1,64 @@
 @model Local_Event_Finder.Models.Event
-@{
-    ViewData["Title"] = "Create Event";
-}
-<h1>Create Event</h1>
+@{ ViewData["Title"] = "Create Event"; }
+<a asp-action="Index" class="btn btn-sm btn-outline-secondary mb-3"><i class="bi bi-arrow-left"></i> Back</a>
+<h1 class="mb-3">Create Event</h1>
+<div class="event-card" style="max-width:950px;">
 <form asp-action="Create" method="post" class="row g-3">
-    <div class="col-md-6">
+    <div class="col-md-7">
         <label asp-for="Title" class="form-label"></label>
-        <input asp-for="Title" class="form-control" />
+        <input asp-for="Title" class="form-control" placeholder="Event title" />
         <span class="text-danger" asp-validation-for="Title"></span>
     </div>
-    <div class="col-md-12">
-        <label asp-for="Description" class="form-label"></label>
-        <textarea asp-for="Description" class="form-control" rows="4"></textarea>
-        <span class="text-danger" asp-validation-for="Description"></span>
-    </div>
-    <div class="col-md-3">
+    <div class="col-md-5">
         <label asp-for="Category" class="form-label"></label>
-        <input asp-for="Category" class="form-control" />
+        <input asp-for="Category" class="form-control" placeholder="e.g. Music, Tech" />
         <span class="text-danger" asp-validation-for="Category"></span>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-4">
         <label asp-for="City" class="form-label"></label>
-        <input asp-for="City" class="form-control" />
+        <input asp-for="City" class="form-control" placeholder="City" />
         <span class="text-danger" asp-validation-for="City"></span>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
         <label asp-for="Venue" class="form-label"></label>
-        <input asp-for="Venue" class="form-control" />
+        <input asp-for="Venue" class="form-control" placeholder="Venue name" />
         <span class="text-danger" asp-validation-for="Venue"></span>
     </div>
+    <div class="col-md-4">
+        <label asp-for="Organizer" class="form-label"></label>
+        <input asp-for="Organizer" class="form-control" placeholder="Organizer" />
+        <span class="text-danger" asp-validation-for="Organizer"></span>
+    </div>
     <div class="col-md-3">
-        <label asp-for="StartUtc" class="form-label"></label>
+        <label asp-for="StartUtc" class="form-label">Start (UTC)</label>
         <input asp-for="StartUtc" type="datetime-local" class="form-control" />
         <span class="text-danger" asp-validation-for="StartUtc"></span>
     </div>
     <div class="col-md-3">
-        <label asp-for="EndUtc" class="form-label"></label>
+        <label asp-for="EndUtc" class="form-label">End (UTC)</label>
         <input asp-for="EndUtc" type="datetime-local" class="form-control" />
         <span class="text-danger" asp-validation-for="EndUtc"></span>
     </div>
-    <div class="col-md-2 form-check mt-4">
-        <input asp-for="IsFree" class="form-check-input" />
-        <label asp-for="IsFree" class="form-check-label"></label>
+    <div class="col-md-2 d-flex align-items-center">
+        <div class="form-check mt-4">
+            <input asp-for="IsFree" class="form-check-input" />
+            <label asp-for="IsFree" class="form-check-label"></label>
+        </div>
     </div>
     <div class="col-md-4">
-        <label asp-for="Organizer" class="form-label"></label>
-        <input asp-for="Organizer" class="form-control" />
-        <span class="text-danger" asp-validation-for="Organizer"></span>
-    </div>
-    <div class="col-md-6">
         <label asp-for="ExternalUrl" class="form-label"></label>
-        <input asp-for="ExternalUrl" class="form-control" />
+        <input asp-for="ExternalUrl" class="form-control" placeholder="https://..." />
         <span class="text-danger" asp-validation-for="ExternalUrl"></span>
     </div>
     <div class="col-12">
-        <button type="submit" class="btn btn-primary">Create</button>
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="5" placeholder="Describe the event"></textarea>
+        <span class="text-danger" asp-validation-for="Description"></span>
+    </div>
+    <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle"></i> Create</button>
         <a asp-action="Index" class="btn btn-secondary">Cancel</a>
     </div>
 </form>
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
+</div>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

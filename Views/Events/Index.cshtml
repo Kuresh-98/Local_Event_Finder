@@ -1,52 +1,104 @@
-@model IEnumerable<Local_Event_Finder.Models.Event>
+@model Local_Event_Finder.ViewModels.PagedEventsViewModel
 @{
     ViewData["Title"] = "Events";
+    bool showCrud = false; // hide create/edit/delete for normal users now
 }
-<h1>Events</h1>
-<form method="get" class="row g-2 mb-3">
-    <div class="col-md-3">
-        <input name="text" value="@ViewData["SearchText"]" class="form-control" placeholder="Search text" />
-    </div>
-    <div class="col-md-2">
-        <input name="city" value="@ViewData["City"]" class="form-control" placeholder="City" />
-    </div>
-    <div class="col-md-2">
-        <input name="category" value="@ViewData["Category"]" class="form-control" placeholder="Category" />
-    </div>
-    <div class="col-md-2">
-        <input type="date" name="from" value="@ViewData["From"]" class="form-control" />
-    </div>
-    <div class="col-md-2">
-        <input type="date" name="to" value="@ViewData["To"]" class="form-control" />
-    </div>
-    <div class="col-md-1 d-grid">
-        <button class="btn btn-primary" type="submit">Go</button>
-    </div>
-</form>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Category</th>
-            <th>City</th>
-            <th>Start</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var e in Model)
+<div class="d-flex align-items-center mb-3 flex-wrap gap-2">
+    <h1 class="m-0 me-3">Events</h1>
+    @if (showCrud)
     {
-        <tr>
-            <td>@e.Title</td>
-            <td>@e.Category</td>
-            <td>@e.City</td>
-            <td>@e.StartUtc.ToLocalTime().ToString("g")</td>
-            <td><a asp-action="Details" asp-route-id="@e.Id" class="btn btn-sm btn-outline-secondary">Details</a></td>
-        </tr>
+        <a asp-action="Create" class="btn btn-accent btn-sm"><i class="bi bi-plus-circle"></i> Add</a>
     }
-    </tbody>
-</table>
-@if(!Model.Any())
+    <div class="ms-auto d-flex gap-2">
+        <a class="btn btn-sm btn-outline-secondary @(Model.Sort=="startAsc"?"active":"")" asp-route-sort="startAsc" asp-route-page="1" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">Start &#9650;</a>
+        <a class="btn btn-sm btn-outline-secondary @(Model.Sort=="startDesc"?"active":"")" asp-route-sort="startDesc" asp-route-page="1" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">Start &#9660;</a>
+        <a class="btn btn-sm btn-outline-secondary @(Model.Sort=="titleAsc"?"active":"")" asp-route-sort="titleAsc" asp-route-page="1" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">Title A–Z</a>
+        <a class="btn btn-sm btn-outline-secondary @(Model.Sort=="titleDesc"?"active":"")" asp-route-sort="titleDesc" asp-route-page="1" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">Title Z–A</a>
+    </div>
+</div>
+<div class="filter-panel">
+    <h2>Filter</h2>
+    <form method="get" class="row g-3 align-items-end">
+        <input type="hidden" name="sort" value="@Model.Sort" />
+        <div class="col-md-3">
+            <label class="form-label">Text</label>
+            <input name="text" value="@Model.SearchText" class="form-control placeholder-muted" placeholder="Search title / description" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">City</label>
+            <input name="city" value="@Model.City" class="form-control placeholder-muted" placeholder="City" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Category</label>
+            <input name="category" value="@Model.Category" class="form-control placeholder-muted" placeholder="Category" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">From</label>
+            <input type="date" name="from" value="@(Model.From?.ToString("yyyy-MM-dd"))" class="form-control" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">To</label>
+            <input type="date" name="to" value="@(Model.To?.ToString("yyyy-MM-dd"))" class="form-control" />
+        </div>
+        <div class="col-md-1 d-grid">
+            <button class="btn btn-primary" type="submit"><i class="bi bi-funnel"></i></button>
+        </div>
+    </form>
+</div>
+@if (!Model.Events.Any())
 {
-    <p>No events found.</p>
+    <div class="alert alert-warning">No events found.</div>
+}
+<div class="row g-4">
+@foreach (var e in Model.Events)
+{
+    <div class="col-md-4 col-sm-6 d-flex">
+        <div class="event-card w-100">
+            <div class="d-flex justify-content-between align-items-start">
+                <span class="event-badge"><i class="bi bi-tag"></i> @e.Category</span>
+                <span class="event-badge">@e.City</span>
+            </div>
+            <h3 class="event-title">@e.Title</h3>
+            <div class="event-time"><i class="bi bi-clock"></i> @e.StartUtc.ToLocalTime().ToString("ddd, dd MMM yyyy HH:mm")</div>
+            <div class="event-meta">
+                <span><i class="bi bi-geo-alt"></i> @e.Venue</span>
+                <span><i class="bi bi-person"></i> @e.Organizer</span>
+                <span class="badge @(e.IsFree ? "badge-free" : "badge-paid")">@(e.IsFree ? "Free" : "Paid")</span>
+            </div>
+            <p class="small text-muted" style="flex-grow:1; margin-top:.25rem;">@e.Description.Substring(0, Math.Min(110, e.Description.Length))@(e.Description.Length > 110 ? "..." : "")</p>
+            <div class="event-actions">
+                <a asp-action="Details" asp-route-id="@e.Id" class="btn btn-sm btn-outline-secondary"><i class="bi bi-info-circle"></i> Details</a>
+                @if (showCrud)
+                {
+                    <a asp-action="Edit" asp-route-id="@e.Id" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></a>
+                    <a asp-action="Delete" asp-route-id="@e.Id" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                }
+            </div>
+        </div>
+    </div>
+}
+</div>
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-4" aria-label="Pagination">
+        <ul class="pagination pagination-sm flex-wrap gap-1">
+            @{
+                var prevDisabled = Model.Page == 1 ? " disabled" : string.Empty;
+                var nextDisabled = Model.Page == Model.TotalPages ? " disabled" : string.Empty;
+            }
+            <li class="page-item@prevDisabled">
+                <a class="page-link" asp-route-page="@(Model.Page - 1)" asp-route-sort="@Model.Sort" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))" aria-label="Previous">&laquo;</a>
+            </li>
+            @for (var p = 1; p <= Model.TotalPages; p++)
+            {
+                var active = p == Model.Page ? " active" : string.Empty;
+                <li class="page-item@active">
+                    <a class="page-link" asp-route-page="@p" asp-route-sort="@Model.Sort" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">@p</a>
+                </li>
+            }
+            <li class="page-item@nextDisabled">
+                <a class="page-link" asp-route-page="@(Model.Page + 1)" asp-route-sort="@Model.Sort" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))" aria-label="Next">&raquo;</a>
+            </li>
+        </ul>
+    </nav>
 }

@@ -1,0 +1,14 @@
+@{
+    var msg = TempData["Flash.Message"] as string;
+    var type = TempData["Flash.Type"] as string ?? "success";
+}
+@if (!string.IsNullOrWhiteSpace(msg))
+{
+    <div class="flash-toast flash-@type" data-flash>
+        <div class="flash-content">
+            <span>@msg</span>
+            <button type="button" class="flash-close" data-flash-close>&times;</button>
+        </div>
+        <div class="flash-progress" data-flash-progress></div>
+    </div>
+}
