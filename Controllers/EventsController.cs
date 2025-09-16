@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Local_Event_Finder.Services;
+using Local_Event_Finder.Models;
 
 namespace Local_Event_Finder.Controllers;
 
@@ -25,6 +26,75 @@ public class EventsController : Controller
         ViewData["From"] = from?.ToString("yyyy-MM-dd");
         ViewData["To"] = to?.ToString("yyyy-MM-dd");
         return View(results);
+    }
+
+    // GET /Events/create
+    [HttpGet("create")]
+    public IActionResult Create()
+    {
+        var model = new Event
+        {
+            StartUtc = DateTime.UtcNow.AddDays(1).Date.AddHours(17),
+            EndUtc = DateTime.UtcNow.AddDays(1).Date.AddHours(19)
+        };
+        return View(model);
+    }
+
+    // POST /Events/create
+    [HttpPost("create")]
+    [ValidateAntiForgeryToken]
+    public IActionResult Create(Event model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+        _eventService.Add(model);
+        // Redirect to details page
+        return RedirectToAction(nameof(Details), new { id = model.Id });
+    }
+
+    // GET /Events/edit/5
+    [HttpGet("edit/{id:int}")]
+    public IActionResult Edit(int id)
+    {
+        var ev = _eventService.GetById(id);
+        if (ev == null) return NotFound();
+        return View(ev);
+    }
+
+    // POST /Events/edit/5
+    [HttpPost("edit/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public IActionResult Edit(int id, Event model)
+    {
+        if (id != model.Id) return BadRequest();
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+        var updated = _eventService.Update(model);
+        if (updated == null) return NotFound();
+        return RedirectToAction(nameof(Details), new { id = model.Id });
+    }
+
+    // GET /Events/delete/5 (confirmation)
+    [HttpGet("delete/{id:int}")]
+    public IActionResult Delete(int id)
+    {
+        var ev = _eventService.GetById(id);
+        if (ev == null) return NotFound();
+        return View(ev);
+    }
+
+    // POST /Events/delete/5
+    [HttpPost("delete/{id:int}")]
+    [ValidateAntiForgeryToken]
+    public IActionResult ConfirmDelete(int id)
+    {
+        var ok = _eventService.Delete(id);
+        if (!ok) return NotFound();
+        return RedirectToAction(nameof(Index));
     }
 
     // GET /Events/2
