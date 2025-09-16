@@ -1,11 +1,11 @@
 @model Local_Event_Finder.ViewModels.PagedEventsViewModel
 @{
     ViewData["Title"] = "Events";
-    bool showCrud = false; // hide create/edit/delete for normal users now
+    var isAdmin = User.IsInRole("Admin");
 }
 <div class="d-flex align-items-center mb-3 flex-wrap gap-2">
-    <h1 class="m-0 me-3">Events</h1>
-    @if (showCrud)
+    <h1 class="m-0 me-3">Events <span class="badge bg-secondary align-middle" style="font-size:.6rem;">UTC</span></h1>
+    @if (isAdmin)
     {
         <a asp-action="Create" class="btn btn-accent btn-sm"><i class="bi bi-plus-circle"></i> Add</a>
     }
@@ -17,31 +17,35 @@
     </div>
 </div>
 <div class="filter-panel">
-    <h2>Filter</h2>
-    <form method="get" class="row g-3 align-items-end">
+    <h2 class="mb-3">Filter</h2>
+    <form method="get" class="row gy-3 gx-3 align-items-end" autocomplete="off">
         <input type="hidden" name="sort" value="@Model.Sort" />
-        <div class="col-md-3">
-            <label class="form-label">Text</label>
-            <input name="text" value="@Model.SearchText" class="form-control placeholder-muted" placeholder="Search title / description" />
+        <div class="col-lg-3 col-md-4">
+            <label for="filterText" class="form-label filter-label">Search</label>
+            <div class="input-group input-group-sm filter-search-group">
+                <span class="input-group-text filter-addon"><i class="bi bi-search"></i></span>
+                <input id="filterText" aria-label="Search text" name="text" value="@Model.SearchText" class="form-control" placeholder="Search title or description" />
+            </div>
         </div>
-        <div class="col-md-2">
-            <label class="form-label">City</label>
-            <input name="city" value="@Model.City" class="form-control placeholder-muted" placeholder="City" />
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <label for="filterCity" class="form-label filter-label">City</label>
+            <input id="filterCity" aria-label="City" name="city" value="@Model.City" class="form-control" placeholder="City" />
         </div>
-        <div class="col-md-2">
-            <label class="form-label">Category</label>
-            <input name="category" value="@Model.Category" class="form-control placeholder-muted" placeholder="Category" />
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <label for="filterCategory" class="form-label filter-label">Category</label>
+            <input id="filterCategory" aria-label="Category" name="category" value="@Model.Category" class="form-control" placeholder="Category" />
         </div>
-        <div class="col-md-2">
-            <label class="form-label">From</label>
-            <input type="date" name="from" value="@(Model.From?.ToString("yyyy-MM-dd"))" class="form-control" />
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <label for="filterFrom" class="form-label filter-label">From</label>
+            <input id="filterFrom" aria-label="From date" type="date" name="from" value="@(Model.From?.ToString("yyyy-MM-dd"))" class="form-control" />
         </div>
-        <div class="col-md-2">
-            <label class="form-label">To</label>
-            <input type="date" name="to" value="@(Model.To?.ToString("yyyy-MM-dd"))" class="form-control" />
+        <div class="col-lg-2 col-md-4 col-sm-6">
+            <label for="filterTo" class="form-label filter-label">To</label>
+            <input id="filterTo" aria-label="To date" type="date" name="to" value="@(Model.To?.ToString("yyyy-MM-dd"))" class="form-control" />
         </div>
-        <div class="col-md-1 d-grid">
-            <button class="btn btn-primary" type="submit"><i class="bi bi-funnel"></i></button>
+        <div class="col-lg-1 col-md-2 d-grid">
+            <label class="form-label d-none d-lg-block filter-label">&nbsp;</label>
+            <button class="btn btn-primary btn-sm" type="submit" title="Apply filters"><i class="bi bi-funnel"></i></button>
         </div>
     </form>
 </div>
@@ -49,7 +53,7 @@
 {
     <div class="alert alert-warning">No events found.</div>
 }
-<div class="row g-4">
+<div class="row g-4 mt-1">
 @foreach (var e in Model.Events)
 {
     <div class="col-md-4 col-sm-6 d-flex">
@@ -59,7 +63,7 @@
                 <span class="event-badge">@e.City</span>
             </div>
             <h3 class="event-title">@e.Title</h3>
-            <div class="event-time"><i class="bi bi-clock"></i> @e.StartUtc.ToLocalTime().ToString("ddd, dd MMM yyyy HH:mm")</div>
+            <div class="event-time"><i class="bi bi-clock"></i> @e.StartUtc.ToString("ddd, dd MMM yyyy HH:mm")</div>
             <div class="event-meta">
                 <span><i class="bi bi-geo-alt"></i> @e.Venue</span>
                 <span><i class="bi bi-person"></i> @e.Organizer</span>
@@ -68,10 +72,10 @@
             <p class="small text-muted" style="flex-grow:1; margin-top:.25rem;">@e.Description.Substring(0, Math.Min(110, e.Description.Length))@(e.Description.Length > 110 ? "..." : "")</p>
             <div class="event-actions">
                 <a asp-action="Details" asp-route-id="@e.Id" class="btn btn-sm btn-outline-secondary"><i class="bi bi-info-circle"></i> Details</a>
-                @if (showCrud)
+                @if (isAdmin)
                 {
-                    <a asp-action="Edit" asp-route-id="@e.Id" class="btn btn-sm btn-primary"><i class="bi bi-pencil"></i></a>
-                    <a asp-action="Delete" asp-route-id="@e.Id" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></a>
+                    <a asp-action="Edit" asp-route-id="@e.Id" class="btn btn-sm btn-primary" title="Edit"><i class="bi bi-pencil"></i></a>
+                    <a asp-action="Delete" asp-route-id="@e.Id" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></a>
                 }
             </div>
         </div>

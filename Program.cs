@@ -6,8 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC + Razor Views
+// MVC + Razor Views (for controllers) + Razor Pages (for Identity UI)
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages(); // Needed for Identity's Razor Pages (Login, Register, etc.)
 
 // Database (SQL Server)
 var conn = builder.Configuration.GetConnectionString("AppDb");
@@ -39,10 +40,8 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    // Now that we have an initial migration, always use Migrate() so __EFMigrationsHistory stays consistent.
     db.Database.Migrate();
 
-    // Seed roles + admin (idempotent)
     var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userMgr = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
@@ -60,7 +59,6 @@ using (var scope = app.Services.CreateScope())
     if (!userMgr.IsInRoleAsync(adminUser, adminRole).GetAwaiter().GetResult())
         userMgr.AddToRoleAsync(adminUser, adminRole).GetAwaiter().GetResult();
 
-    // Seed sample events only if table empty
     if (!db.Events.Any())
     {
         db.Events.AddRange(new[]
@@ -85,6 +83,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+// Identity UI (Razor Pages)
+app.MapRazorPages();
 
 app.MapControllerRoute(
     name: "default",
