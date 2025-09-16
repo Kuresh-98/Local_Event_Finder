@@ -56,6 +56,9 @@ public class Event : IValidatableObject
     [Display(Name = "Available Seats")]
     public int AvailableSeats { get; set; }
 
+    [Display(Name = "Event Cancelled")]
+    public bool IsCancelled { get; set; }
+
     // Navigation property for user interests
     public ICollection<EventInterest> EventInterests { get; set; } = new List<EventInterest>();
 

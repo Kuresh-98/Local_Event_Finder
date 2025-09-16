@@ -62,6 +62,7 @@ public class DbEventService : IEventService
         tracked.Longitude = ev.Longitude;
         tracked.TotalSeats = ev.TotalSeats;
         tracked.AvailableSeats = ev.AvailableSeats;
+        tracked.IsCancelled = ev.IsCancelled;
         
         _db.SaveChanges();
         return tracked;
@@ -70,5 +71,14 @@ public class DbEventService : IEventService
     {
         var tracked = _db.Events.FirstOrDefault(e => e.Id == id);
         if (tracked == null) return false; _db.Events.Remove(tracked); _db.SaveChanges(); return true;
+    }
+
+    public bool ToggleCancellation(int id)
+    {
+        var tracked = _db.Events.FirstOrDefault(e => e.Id == id);
+        if (tracked == null) return false;
+        tracked.IsCancelled = !tracked.IsCancelled;
+        _db.SaveChanges();
+        return true;
     }
 }

@@ -261,4 +261,23 @@ public class EventsController : Controller
             canRegister = canRegister
         });
     }
+
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public IActionResult ToggleCancellation(int id)
+    {
+        var success = _eventService.ToggleCancellation(id);
+        if (success)
+        {
+            var eventItem = _eventService.GetById(id);
+            var message = eventItem?.IsCancelled == true ? "Event cancelled successfully" : "Event uncancelled successfully";
+            Flash(message, "info");
+        }
+        else
+        {
+            Flash("Event not found", "danger");
+        }
+        
+        return RedirectToAction(nameof(Index));
+    }
 }

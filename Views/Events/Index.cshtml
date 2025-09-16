@@ -4,17 +4,11 @@
     var isAdmin = User.IsInRole("Admin");
 }
 <div class="d-flex align-items-center mb-3 flex-wrap gap-2">
-    <h1 class="m-0 me-3">Events <span class="badge bg-secondary align-middle" style="font-size:.6rem;">UTC</span></h1>
+    <h1 class="m-0 me-3">Events <span class="badge bg-secondary align-middle" style="font-size:.6rem;"></span></h1>
     @if (isAdmin)
     {
         <a asp-action="Create" class="btn btn-accent btn-sm"><i class="bi bi-plus-circle"></i> Add</a>
     }
-    <div class="ms-auto d-flex gap-2">
-        <a class="btn btn-sm btn-outline-secondary @(Model.Sort=="startAsc"?"active":"")" asp-route-sort="startAsc" asp-route-page="1" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">Start &#9650;</a>
-        <a class="btn btn-sm btn-outline-secondary @(Model.Sort=="startDesc"?"active":"")" asp-route-sort="startDesc" asp-route-page="1" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">Start &#9660;</a>
-        <a class="btn btn-sm btn-outline-secondary @(Model.Sort=="titleAsc"?"active":"")" asp-route-sort="titleAsc" asp-route-page="1" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">Title A�Z</a>
-        <a class="btn btn-sm btn-outline-secondary @(Model.Sort=="titleDesc"?"active":"")" asp-route-sort="titleDesc" asp-route-page="1" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">Title Z�A</a>
-    </div>
 </div>
 <div class="filter-panel">
     <h2 class="mb-3">Filter</h2>
@@ -65,6 +59,12 @@
                 <span class="event-badge"><i class="bi bi-tag"></i> @e.Category</span>
                 <span class="event-badge">@e.City</span>
             </div>
+            @if (e.IsCancelled)
+            {
+                <div class="alert alert-danger mb-2 py-2">
+                    <i class="bi bi-x-circle"></i> <strong>Event Cancelled</strong>
+                </div>
+            }
             <h3 class="event-title">@e.Title</h3>
             <div class="event-time"><i class="bi bi-clock"></i> @e.StartUtc.ToString("ddd, dd MMM yyyy HH:mm")</div>
             <div class="event-meta">
@@ -86,11 +86,25 @@
             </div>
             <p class="small text-muted" style="flex-grow:1; margin-top:.25rem;">@e.Description.Substring(0, Math.Min(110, e.Description.Length))@(e.Description.Length > 110 ? "..." : "")</p>
             <div class="event-actions">
-                <a asp-action="Details" asp-route-id="@e.Id" class="btn btn-sm btn-outline-secondary"><i class="bi bi-info-circle"></i> Details</a>
+                <a asp-action="Details" asp-route-id="@e.Id" class="btn btn-sm btn-primary" title="View Details">
+                    <i class="bi bi-eye"></i> Details
+                </a>
                 @if (isAdmin)
                 {
-                    <a asp-action="Edit" asp-route-id="@e.Id" class="btn btn-sm btn-primary" title="Edit"><i class="bi bi-pencil"></i></a>
-                    <a asp-action="Delete" asp-route-id="@e.Id" class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></a>
+                    <a asp-action="Edit" asp-route-id="@e.Id" class="btn btn-sm btn-edit" title="Edit Event">
+                        <i class="bi bi-pencil-square"></i> Edit
+                    </a>
+                    <form asp-action="ToggleCancellation" asp-route-id="@e.Id" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm @(e.IsCancelled ? "btn-warning" : "btn-secondary")" 
+                                title="@(e.IsCancelled ? "Uncancel Event" : "Cancel Event")"
+                                onclick="return confirm('@(e.IsCancelled ? "Are you sure you want to uncancel this event?" : "Are you sure you want to cancel this event?")')">
+                            <i class="bi @(e.IsCancelled ? "bi-check-circle" : "bi-x-circle")"></i> 
+                            @(e.IsCancelled ? "Uncancel" : "Cancel")
+                        </button>
+                    </form>
+                    <a asp-action="Delete" asp-route-id="@e.Id" class="btn btn-sm btn-delete" title="Delete Event">
+                        <i class="bi bi-trash3"></i> Delete
+                    </a>
                 }
             </div>
         </div>
@@ -99,25 +113,57 @@
 </div>
 @if (Model.TotalPages > 1)
 {
-    <nav class="mt-4" aria-label="Pagination">
-        <ul class="pagination pagination-sm flex-wrap gap-1">
+    <div class="pagination-wrapper mt-5">
+        <div class="pagination-container">
             @{
                 var prevDisabled = Model.Page == 1 ? " disabled" : string.Empty;
                 var nextDisabled = Model.Page == Model.TotalPages ? " disabled" : string.Empty;
             }
-            <li class="page-item@prevDisabled">
-                <a class="page-link" asp-route-page="@(Model.Page - 1)" asp-route-sort="@Model.Sort" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))" aria-label="Previous">&laquo;</a>
-            </li>
+            
+            <!-- Previous Button -->
+            <a class="pagination-btn prev-btn@prevDisabled" 
+               asp-route-page="@(Model.Page - 1)" 
+               asp-route-sort="@Model.Sort" 
+               asp-route-text="@Model.SearchText" 
+               asp-route-city="@Model.City" 
+               asp-route-category="@Model.Category" 
+               asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" 
+               asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">
+                <i class="bi bi-chevron-left"></i>
+                <span>Previous</span>
+            </a>
+
+            <!-- Page Numbers -->
             @for (var p = 1; p <= Model.TotalPages; p++)
             {
                 var active = p == Model.Page ? " active" : string.Empty;
-                <li class="page-item@active">
-                    <a class="page-link" asp-route-page="@p" asp-route-sort="@Model.Sort" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">@p</a>
-                </li>
+                <a class="pagination-btn page-btn@active" 
+                   asp-route-page="@p" 
+                   asp-route-sort="@Model.Sort" 
+                   asp-route-text="@Model.SearchText" 
+                   asp-route-city="@Model.City" 
+                   asp-route-category="@Model.Category" 
+                   asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" 
+                   asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">@p</a>
             }
-            <li class="page-item@nextDisabled">
-                <a class="page-link" asp-route-page="@(Model.Page + 1)" asp-route-sort="@Model.Sort" asp-route-text="@Model.SearchText" asp-route-city="@Model.City" asp-route-category="@Model.Category" asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))" aria-label="Next">&raquo;</a>
-            </li>
-        </ul>
-    </nav>
+
+            <!-- Next Button -->
+            <a class="pagination-btn next-btn@nextDisabled" 
+               asp-route-page="@(Model.Page + 1)" 
+               asp-route-sort="@Model.Sort" 
+               asp-route-text="@Model.SearchText" 
+               asp-route-city="@Model.City" 
+               asp-route-category="@Model.Category" 
+               asp-route-from="@(Model.From?.ToString("yyyy-MM-dd"))" 
+               asp-route-to="@(Model.To?.ToString("yyyy-MM-dd"))">
+                <span>Next</span>
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+        
+        <!-- Page Info -->
+        <div class="pagination-info">
+            <span>Showing page <strong>@Model.Page</strong> of <strong>@Model.TotalPages</strong> • <strong>@Model.TotalItems</strong> total events</span>
+        </div>
+    </div>
 }

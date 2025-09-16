@@ -26,7 +26,13 @@
                                         <span class="event-badge"><i class="bi bi-tag"></i> @interest.Event.Category</span>
                                         <span class="event-badge">@interest.Event.City</span>
                                     </div>
-                                    <h5 class="card-title">@interest.Event.Title</h5>
+                                    @if (interest.Event.IsCancelled)
+                                    {
+                                        <div class="alert alert-danger mb-2 py-2">
+                                            <i class="bi bi-x-circle"></i> <strong>Event Cancelled</strong>
+                                        </div>
+                                    }
+                                    <h5 class="card-title my-events-title">@interest.Event.Title</h5>
                                     <div class="event-time mb-2">
                                         <i class="bi bi-clock"></i> @interest.Event.StartUtc.ToString("ddd, dd MMM yyyy HH:mm")
                                     </div>
@@ -46,7 +52,7 @@
                                         @interest.Event.Description.Substring(0, Math.Min(100, interest.Event.Description.Length))@(interest.Event.Description.Length > 100 ? "..." : "")
                                     </p>
                                     <div class="registration-info">
-                                        <small class="text-success">
+                                        <small class="text-success my-events-registration">
                                             <i class="bi bi-check-circle"></i> Registered on @interest.InterestedAt.ToString("MMM dd, yyyy")
                                         </small>
                                     </div>

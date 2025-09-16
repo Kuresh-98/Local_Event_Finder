@@ -10,6 +10,7 @@ public interface IEventService
     Event Add(Event ev);
     Event? Update(Event ev);
     bool Delete(int id);
+    bool ToggleCancellation(int id);
 }
 
 // This implementation kept for reference/testing without DB
@@ -87,6 +88,14 @@ public class InMemoryEventService : IEventService
         var existing = _events.FirstOrDefault(x => x.Id == id);
         if (existing == null) return false;
         _events.Remove(existing);
+        return true;
+    }
+
+    public bool ToggleCancellation(int id)
+    {
+        var existing = _events.FirstOrDefault(x => x.Id == id);
+        if (existing == null) return false;
+        existing.IsCancelled = !existing.IsCancelled;
         return true;
     }
 }

@@ -31,6 +31,12 @@ public class EventInterestService : IEventInterestService
         }
         else
         {
+            // Check if event is cancelled
+            if (eventItem.IsCancelled)
+            {
+                return false; // Cannot register for cancelled events
+            }
+
             // Check if seats are available
             if (eventItem.AvailableSeats <= 0)
             {
@@ -98,6 +104,9 @@ public class EventInterestService : IEventInterestService
     {
         var eventItem = await _context.Events.FindAsync(eventId);
         if (eventItem == null) return false;
+
+        // Cannot register for cancelled events
+        if (eventItem.IsCancelled) return false;
 
         // If no total seats set, allow unlimited registration
         if (!eventItem.TotalSeats.HasValue) return true;

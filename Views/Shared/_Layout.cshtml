@@ -12,7 +12,7 @@
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-gradient-primary shadow-sm">
             <div class="container">
-                <a class="navbar-brand fw-bold" asp-controller="Events" asp-action="Index">LocalEventFinder</a>
+                <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">LocalEventFinder</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -38,9 +38,17 @@
             @RenderBody()
         </main>
     </div>
-    <footer class="footer-custom mt-auto py-3">
-        <div class="container small text-center text-muted">
-            &copy; @DateTime.Now.Year - Local Event Finder
+    <footer class="footer-custom mt-auto py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0">&copy; @DateTime.Now.Year Local Event Finder. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a href="#" class="text-decoration-none me-3">About</a>
+                    <a href="#" class="text-decoration-none">Contact</a>
+                </div>
+            </div>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
